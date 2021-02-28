@@ -1,5 +1,4 @@
-
-#사용버전
+# 사용버전
 - PyMySQL	1.0.2	
 - SQLAlchemy	1.3.23
 - click	7.1.2
@@ -12,14 +11,14 @@
 - typing-extensions	3.7.4.3
 - uvicorn	0.13.4
 
-#Mysql SQLAlchemy 연결 후 저장 테스트 
+# Mysql SQLAlchemy 연결 후 저장 테스트 
 - 데이터저장 router 폴더의 index.py 참고 
 
-#confing (common 폴더) 
+# confing (common 폴더) 
 - config.py 파일안에 커넥션 정보 
 - conn.py DB연결 
 
-#main.py (include_router/DB conf)
+# main.py (include_router/DB conf)
 - app.include_router(index.router)
 - conf_dict = asdict(c) (from dataclasses import asdict 클래스를 딕셔너리 반환)
 
