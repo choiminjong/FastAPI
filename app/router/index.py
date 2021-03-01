@@ -1,27 +1,34 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends
 from starlette.responses import Response
-from starlette.requests import Request
-from inspect import currentframe as frame
 
+#DB
 from sqlalchemy.orm import Session
-
 from app.database.conn import db
-from app.database.schema import Users
-router = APIRouter()
+from app.database.pymysql import dbUtils
 
+#모델
+from app.model.index import Project
+from datetime import datetime
 
-@router.get("/")
-async def index(session: Session = Depends(db.session),):
-    """
-    ELB 상태 체크용 API
-    :return:
-    """
-    user= Users(status='active', name="HelloWorld")
-    session.add(user)
-    session.commit()
+'''
+참고
+https://fastapi.tiangolo.com/tutorial/bigger-applications/
+'''
+router = APIRouter(
+    prefix="/items",
+    tags=["items"],
+    responses={404: {"description": "Not found"}},
+)
 
-    Users.create(session,auto_commit=True, name="코알라")
-    current_time = datetime.utcnow()
-    return Response(f"Notification API (UTC: {current_time.strftime('%Y.%m.%d %H:%M:%S')})")
+@router.get("/{item_id}")
+async def read_item(item_id:str, session: Session = Depends(db.session)):
+    #query = 'SELECT * FROM users WHERE no = :no', {'no': item_id}
+    query = 'SELECT * FROM users WHERE no = '+item_id
+    #query = 'SELECT * FROM users '
+    return dbUtils().selectAll(session, query)
+
+@router.post("/project")
+async def read_item(Project: Project, session: Session = Depends(db.session)):
+    #print(Project)
+    return Project
+

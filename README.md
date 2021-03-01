@@ -11,8 +11,14 @@
 - typing-extensions	3.7.4.3
 - uvicorn	0.13.4
 
-# Mysql SQLAlchemy 연결 후 저장 테스트 
-- 데이터저장 router 폴더의 index.py 참고 
+# SQLAlchemy 세션을 이용해서 PURE query 실행 
+- router index get/post 예시 생성 
+
+# docs 섹터분리
+- router = APIRouter( prefix="/items",tags=["items"] 등으로 docs 섹터분리)
+
+# model 추가 
+- client 데이터 받을때 모델 데이터 참조 
 
 # confing (common 폴더) 
 - config.py 파일안에 커넥션 정보 
@@ -24,4 +30,7 @@
 
 # FastAPI (참고 소스) 
 - https://github.com/riseryan89/notification-api
+
+
+databaseinit
 

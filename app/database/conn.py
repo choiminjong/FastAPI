@@ -53,7 +53,11 @@ class SQLAlchemy:
         try:
             db_session = self._session()
             yield db_session
+        except:
+            raise
+            session.rollback()
         finally:
+            db_session.commit()
             db_session.close()
 
     @property
@@ -63,7 +67,6 @@ class SQLAlchemy:
     @property
     def engine(self):
         return self._engine
-
 
 db = SQLAlchemy()
 Base = declarative_base()
