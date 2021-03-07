@@ -22,7 +22,7 @@ class SQLAlchemy:
         pool_recycle = kwargs.setdefault("DB_POOL_RECYCLE", 900)
         echo = kwargs.setdefault("DB_ECHO", True)
 
-        #언팩킹한 데이터베이스 콘프를 여기에 삽입한다.
+        #언팩킹한 데이터베이스 conf 설정 데이터를 여기에 삽입한다.
         self._engine = create_engine(
             database_url,
             echo=echo,
@@ -53,11 +53,7 @@ class SQLAlchemy:
         try:
             db_session = self._session()
             yield db_session
-        except:
-            raise
-            session.rollback()
         finally:
-            db_session.commit()
             db_session.close()
 
     @property
