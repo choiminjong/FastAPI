@@ -39,6 +39,7 @@
 - Router/auth/register 회원가입 후 토큰 발행 
 - Router/auth/register 로그인 후 토큰 발행
 - JWT 기본틀만 검토 만료시간없음 
+- JWT vaildToken 검증 API 추가
 
 # 인증 
 - bcrypt 패스워드 .decode('utf-8') 후 .encode('utf-8')으로 패스워드 검토 

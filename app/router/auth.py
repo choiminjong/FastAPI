@@ -31,6 +31,7 @@ from app.model.auth import UserRegister,Token
 201 Created
 '''
 
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authorization"],
@@ -62,12 +63,41 @@ async def register(UserRegister: UserRegister):
     return token
 
 
+@router.post("/user/login", status_code=200)
+async def userLogin(UserRegister: UserRegister):
+    """
+    `로그인 API`\n
+    :return: Token
+    :param UserRegister:
+    참고 : https://velog.io/@inyong_pang/Flask-%EC%9D%B8%EC%A6%9D-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85-%EC%97%94%EB%93%9C%ED%8F%AC%EC%9D%B8%ED%8A%B8-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
+    """
+    is_exist = await isEmailExist(UserRegister.email)
+    if not UserRegister.email or not UserRegister.pw:
+        return JSONResponse(status_code=400, content=dict(msg="Email and PW must be provided'"))
+    if not is_exist:
+        return JSONResponse(status_code=400, content=dict(msg="NO_MATCH_USER"))
+
+    user = await pwValid(UserRegister.email)
+    isVerified = bcrypt.checkpw(UserRegister.pw.encode('utf-8'), user['pw'].encode('utf-8'))
+
+    if not isVerified:
+         return JSONResponse(status_code=400, content=dict(msg="NO_MATCH_USER"))
+
+    token = dict(Authorization=f"Bearer {createAccessToken2(UserRegister)}")
+
+    return token
+
+
+@router.get("/vaild/{Token}" , status_code=200)
+async def vaildToken(Token: str):
+    return vailidToken(Token)
+
 @router.post("/login/", status_code=200, response_model=Token)
 async def login(UserRegister: UserRegister):
     """
     `로그인 API`\n
-    :param UserRegister:
     :return: Token
+    :param UserRegister:
     """
     is_exist = await isEmailExist(UserRegister.email)
     if not UserRegister.email or not UserRegister.pw:
@@ -84,6 +114,20 @@ async def login(UserRegister: UserRegister):
     #토큰발행
     token = dict(Authorization=f"Bearer {createAccessToken(data=UserRegister.dict(exclude={'pw', 'marketing_agree'}),)}")
     return token
+
+def createAccessToken2(data):
+    payload = {
+        'userEmail': data.email,
+        'exp': datetime.datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
+    }
+    encoded_jwt = jwt.encode(payload, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    return encoded_jwt
+
+def vailidToken(token):
+    access_token = token.replace("Bearer ", "")
+    payload = jwt.decode(access_token, key=JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    return payload
+
 
 async def isEmailExist(email: str):
     query = "SELECT * FROM users where email='" + email + "'"
