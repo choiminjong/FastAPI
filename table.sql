@@ -14,4 +14,5 @@ CREATE TABLE `users` (
 )
 COLLATE='utf8mb4_bin'
 ENGINE=InnoDB
+AUTO_INCREMENT=2
 ;

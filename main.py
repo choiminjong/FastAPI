@@ -1,36 +1,56 @@
-from dataclasses import asdict
-from typing import Optional
-
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+#router 
+from app.router import index,page
+#middleware 
+from fastapi.middleware.cors import CORSMiddleware
+#static
+from fastapi.staticfiles import StaticFiles
+#swagger
+from fastapi.openapi.docs import (get_redoc_html,get_swagger_ui_html,get_swagger_ui_oauth2_redirect_html,)
+#templates
+from fastapi.templating import Jinja2Templates
 
-from app.database.conn import db
-from app.common.config import conf
-from app.router import index
+def include_router(app) :
+   app.include_router(index.router)
+   app.include_router(page.router)
 
-def create_app():
-    """
-    앱 함수 실행
-    :return:
-    """
-    c = conf()
-    app = FastAPI()
-    #클래스를 딕셔너리로 만들어줌
-    conf_dict = asdict(c)
-    #print(conf_dict)
-    db.init_app(app, **conf_dict)
-    # 데이터 베이스 이니셜라이즈
+def configure_static(app) :  
+    app.mount("/public", StaticFiles(directory="public"), name="public")
 
-    # 레디스 이니셜라이즈
+def configure_middleware(app) :  
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-    # 미들웨어 정의
+def create_app() :
+    app = FastAPI(docs_url=None, redoc_url=None)
 
-    # 라우터 정의
-    app.include_router(index.router)
+    @app.get("/docs", include_in_schema=False)
+    async def custom_swagger_ui_html():
+        return get_swagger_ui_html(openapi_url=app.openapi_url,
+            title=app.title + " - Swagger UI",
+            oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+            swagger_js_url="/public/static/swagger/swagger-ui-bundle.js",
+            swagger_css_url="/public/static/swagger/swagger-ui.css",
+        )
+
+    @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
+    async def swagger_ui_redirect():
+        return get_swagger_ui_oauth2_redirect_html()
+
+    @app.get("/redoc", include_in_schema=False)
+    async def redoc_html():
+        return get_redoc_html(openapi_url=app.openapi_url,title=app.title + " - ReDoc",redoc_js_url="/public/static/swagger/redoc.standalone.js",)    
+
+    configure_middleware(app)
+    include_router(app)
+    configure_static(app) 
+
     return app
 
-
 app = create_app()
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
