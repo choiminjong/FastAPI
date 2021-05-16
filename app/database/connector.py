@@ -1,18 +1,21 @@
 import time
 import datetime
 
-#databases utili  
+# [databases utili]
 import pymysql
 from dataclasses import asdict
+
+# [config]
+from app.config.consts import CONFIGMOD
 from app.config.environment import conf
 
 class DBConnector :
-
-    def __init__(self, mod='test', type="") :
+    
+    def __init__(self, type="") :
 
         # Mod에 따라 DB modConfig 변경
         dbData={}
-        for configData in [config.split("=") for config in asdict(conf(mod))[type].split(";")] :
+        for configData in [config.split("=") for config in asdict(conf(CONFIGMOD))[type].split(";")] :
             dbData[configData[0]]=configData[1]
 
         self.__host     = dbData['HOST']

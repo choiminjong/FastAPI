@@ -11,7 +11,6 @@ class Config:
     """
     BASE_DIR: str = base_dir
 
-
 @dataclass
 class TestConfig(Config):
     CONENCTION : str = "HOST=127.0.0.1;USER=root;PWD=Vlvkahqkdlf#elvmf(3;DB=notification_api;CHARSET=utf8mb4"
@@ -19,8 +18,7 @@ class TestConfig(Config):
 
 @dataclass
 class LocalConfig(Config):
-    CONENCTION : str = "HOST=127.0.0.1;USER=root;PWD=Vlvkahqkdlf#elvmf(3;DB=notification_api;CHARSET=utf8mb4"
-    CONFDEVCONENCTION : str = "HOST=127.0.0.1;USER=root;PWD=Vlvkahqkdlf#elvmf(3;DB=notification_api;CHARSET=utf8mb4"
+    CONENCTION : str = "HOST=127.0.0.1;USER=root;PWD=root;DB=notification_api;CHARSET=utf8mb4"
 
 @dataclass
 class ProdConfig(Config):
