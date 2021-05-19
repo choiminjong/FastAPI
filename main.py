@@ -1,6 +1,8 @@
 import uvicorn
 # [fastapi/static Path/swagger]
 from fastapi import FastAPI, Form, HTTPException, Depends, Request, Header
+from fastapi.responses import HTMLResponse
+
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import (get_redoc_html,get_swagger_ui_html,get_swagger_ui_oauth2_redirect_html,)
@@ -9,6 +11,11 @@ from fastapi.openapi.docs import (get_redoc_html,get_swagger_ui_html,get_swagger
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from app.middlewares.access_control import access_control
+
+
+# [starlette]
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import JSONResponse
 
 # [templates]
 from fastapi.templating import Jinja2Templates
@@ -37,17 +44,24 @@ def configure_middleware(app) :
     )
 
 def create_app() :
+
     app = FastAPI(docs_url=None, redoc_url=None)
 
     configure_middleware(app)
     configure_static(app) 
     include_router(app)
-    
+
+    templates = Jinja2Templates(directory="public")
+
+    @app.get("/", response_class=HTMLResponse)
+    async def login(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
+
     '''
     권한체크 
     pemisson : str = Depends(pemissoncheker("admin"))
     '''
-    
+
     @app.get("/docs", include_in_schema=False )
     async def custom_swagger_ui_html( pemisson : str = Depends(pemissoncheker("admin"))):
         return get_swagger_ui_html(openapi_url=app.openapi_url,
@@ -60,7 +74,6 @@ def create_app() :
     @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
     async def swagger_ui_redirect():
         return get_swagger_ui_oauth2_redirect_html()
-
 
     @app.get("/redoc", include_in_schema=False)
     async def redoc_html():

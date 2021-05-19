@@ -15,7 +15,6 @@ async def fetchone():
     result =  DBConnector('CONENCTION').select(query)
     return result
 
-
 @router.get("/fetchall")
 async def fetchall():
     query = "select * from users "

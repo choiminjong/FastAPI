@@ -1,31 +1,29 @@
-
-import re
-import jwt
 import time
 
 # [fastapi]
-from fastapi import Request
+from fastapi import Request,HTTPException
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
-from starlette.responses import Response, HTMLResponse
+from starlette.responses import JSONResponse,RedirectResponse
 
 # [utils/config]
 from app.utils.date_utils import D
 from app.utils.logger import httplogger
 from datetime import datetime, timedelta
-from app.config.consts import EXCEPT_PATH_LIST, EXCEPT_PATH_REGEX
+from app.config.consts import EXCEPT_PATH_LIST,lOGINURL
 
 # [errors]
 from app.errors import exceptions as ex
 from app.errors.exceptions import APIException
 
+# [templates]
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+
+# [JWT]
+from app.utils.jwt import token_decode
+
 async def access_control(request: Request, call_next):
-
-    # [Next Action Class checker]
-    #response = await call_next(request)
-    # [httplogger format ]
-    #await httplogger(request=request, response=response)
-
+    
     request.state.req_time = D.datetime()
     request.state.start = time.time()
     request.state.inspect = None
@@ -35,19 +33,19 @@ async def access_control(request: Request, call_next):
 
     headers = request.headers
     cookies = request.cookies
-
     url = request.url.path
-    if await url_pattern_check(url, EXCEPT_PATH_REGEX) or url in EXCEPT_PATH_LIST:
+
+    if url in EXCEPT_PATH_LIST:
         response = await call_next(request)
         return response
 
     try:
-        if url.startswith("/api"):
-            pass   
-        else :
-            if "Authorization" not in cookies.keys():
-                raise ex.NotAuthorized()
-                
+        if "Authorization" not in cookies.keys():   
+            return RedirectResponse(
+                url=lOGINURL,
+                status_code=302,
+            )  
+
         response = await call_next(request)
 
     except Exception as e:
@@ -57,13 +55,6 @@ async def access_control(request: Request, call_next):
         await httplogger(request=request, error=error)
 
     return response
-
-async def url_pattern_check(path, pattern):
-    result = re.match(pattern, path)
-    if result:
-        return True
-    return False
-
 
 async def exception_handler(error: Exception):
     if not isinstance(error, APIException):

@@ -1,4 +1,6 @@
 
+from starlette.responses import RedirectResponse
+
 class StatusCode:
     HTTP_500 = 500
     HTTP_400 = 400
@@ -52,6 +54,7 @@ class NotAuthorized(APIException):
             code=f"{StatusCode.HTTP_401}{'1'.zfill(4)}",
             ex=ex,
         )
+   
 
 
 class TokenExpiredEx(APIException):
